@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>数据库安全运维与加固报告</title>
+<style>
+    body { font-family: 'SimSun', 'Microsoft YaHei', sans-serif; margin: 40px; color: #333; }
+    h1 { text-align: center; color: #1a237e; font-size: 24px; margin-bottom: 5px; }
+    h2 { color: #1a237e; border-bottom: 2px solid #1a237e; padding-bottom: 5px; margin-top: 30px; }
+    h3 { color: #283593; }
+    .header { text-align: center; margin-bottom: 30px; }
+    .header p { color: #666; font-size: 14px; }
+    .section { margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 5px; }
+    .critical { border-left: 4px solid #d32f2f; }
+    .warning { border-left: 4px solid #f57c00; }
+    .info { border-left: 4px solid #1976d2; }
+    .score-box { text-align: center; padding: 30px; background: linear-gradient(135deg, #1a237e, #283593); color: white; border-radius: 10px; margin: 20px 0; }
+    .score-box .score { font-size: 48px; font-weight: bold; }
+    .score-box .grade { font-size: 24px; margin-top: 10px; }
+    table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+    th { background: #1a237e; color: white; }
+    tr:nth-child(even) { background: #f2f2f2; }
+    .vuln-critical { color: #d32f2f; font-weight: bold; }
+    .vuln-high { color: #f57c00; font-weight: bold; }
+    .vuln-medium { color: #fbc02d; }
+    .status-fixed { color: #388e3c; }
+    .status-unfixed { color: #d32f2f; }
+    .recommendation { background: #e8f5e9; padding: 10px; margin: 5px 0; border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="header">
+    <h1>数据库安全运维与加固报告</h1>
+    <p>报告编号: SEC-20260814-001</p>
+    <p>生成日期: 2026年08月14日</p>
+    <p>密级: 内部秘密</p>
+</div>
+
+<div class="score-box">
+    <div>综合评分</div>
+    <div class="score">0</div>
+    <div class="grade">等级: F (不合格，需重新培训)</div>
+</div>
+
+<h2>1. 概述</h2>
+<div class="section info">
+    <table>
+        <tr><td>学员名称</td><td>学员1</td></tr>
+        <tr><td>报告生成时间</td><td>2026-08-14T14:25:41</td></tr>
+        <tr><td>故事分支</td><td>failed</td></tr>
+        <tr><td>最终阶段</td><td>failed</td></tr>
+        <tr><td>完成任务</td><td>0 个</td></tr>
+        <tr><td>失败次数</td><td>3 次</td></tr>
+    </table>
+</div>
+
+<h2>2. 漏洞列表及修复措施</h2>
+<div class="section">
+    <table>
+        <tr><th>漏洞类型</th><th>端点/位置</th><th>严重级别</th><th>修复状态</th><th>修复方式</th></tr>
+
+        <tr>
+            <td>匿名用户</td>
+            <td>''@localhost</td>
+            <td class="vuln-high">HIGH</td>
+            <td class="status-unfixed">✗ 未修复</td>
+            <td>需执行 DROP USER ''@'localhost' 删除匿名用户</td>
+        </tr>
+        <tr>
+            <td>root远程登录</td>
+            <td>root@%</td>
+            <td class="vuln-critical">CRITICAL</td>
+            <td class="status-unfixed">✗ 未修复</td>
+            <td>需禁止root远程登录（DELETE FROM mysql.user WHERE user='root' AND host='%'）</td>
+        </tr>
+        <tr>
+            <td>弱口令</td>
+            <td>test_user, dev_user等</td>
+            <td class="vuln-high">HIGH</td>
+            <td class="status-unfixed">✗ 未修复</td>
+            <td>需使用 ALTER USER 修改弱口令账号密码</td>
+        </tr>
+        <tr>
+            <td>测试账号过度授权</td>
+            <td>test_user@%</td>
+            <td class="vuln-critical">CRITICAL</td>
+            <td class="status-unfixed">✗ 未修复</td>
+            <td>需 REVOKE DELETE,DROP,FILE ON *.* FROM 'test_user'@'%'</td>
+        </tr>
+        <tr>
+            <td>开发账号过度授权</td>
+            <td>dev_user@%</td>
+            <td class="vuln-high">HIGH</td>
+            <td class="status-unfixed">✗ 未修复</td>
+            <td>需 REVOKE DELETE,DROP,ALTER ON *.* FROM 'dev_user'@'%'</td>
+        </tr>
+        <tr>
+            <td>应用账号过度授权</td>
+            <td>app_user@192.168.%</td>
+            <td class="vuln-high">HIGH</td>
+            <td class="status-unfixed">✗ 未修复</td>
+            <td>需 REVOKE DELETE ON *.* FROM 'app_user'@'192.168.%'</td>
+        </tr>
+        <tr>
+            <td>FILE权限滥用</td>
+            <td>test_user, dev_user</td>
+            <td class="vuln-high">HIGH</td>
+            <td class="status-unfixed">✗ 未修复</td>
+            <td>需 REVOKE FILE ON *.* FROM 相关用户</td>
+        </tr>
+        <tr>
+            <td>Union注入</td>
+            <td>/api/user/profile</td>
+            <td class="vuln-critical">CRITICAL</td>
+            <td class="status-unfixed">✗ 未修复</td>
+            <td>需将字符串拼接SQL改为参数化查询</td>
+        </tr>
+        <tr>
+            <td>盲注</td>
+            <td>/api/search/product</td>
+            <td class="vuln-high">HIGH</td>
+            <td class="status-unfixed">✗ 未修复</td>
+            <td>需部署WAF拦截 + 参数化查询</td>
+        </tr>
+        <tr>
+            <td>SSL/TLS传输加密</td>
+            <td>数据库连接</td>
+            <td class="vuln-info">INFO</td>
+            <td class="status-fixed">✓ 已修复</td>
+            <td>✓ SSL已启用 (have_ssl=YES)，无需修复</td>
+        </tr>
+        <tr>
+            <td>审计日志未启用</td>
+            <td>general_log</td>
+            <td class="vuln-medium">MEDIUM</td>
+            <td class="status-unfixed">✗ 未修复</td>
+            <td>需 SET GLOBAL general_log=ON 启用审计日志</td>
+        </tr>
+        <tr>
+            <td>默认端口(3306)</td>
+            <td>MySQL端口</td>
+            <td class="vuln-info">INFO</td>
+            <td class="status-fixed">✓ 已修复</td>
+            <td>提示：默认端口3306需在my.cnf中修改并重启MySQL服务（非紧急项）</td>
+        </tr>
+        <tr>
+            <td>密码过期策略未设置</td>
+            <td>default_password_lifetime</td>
+            <td class="vuln-medium">MEDIUM</td>
+            <td class="status-unfixed">✗ 未修复</td>
+            <td>需 SET GLOBAL default_password_lifetime=180</td>
+        </tr></table></div>
+<h2>3. 权限变更清单</h2>
+<div class="section">
+    <table><tr><th>操作</th><th>用户</th><th>Host</th><th>权限/操作</th><th>状态</th></tr>
+<tr><td>REVOKE</td><td>test_user</td><td>%</td><td>DELETE,DROP,FILE</td><td>待处理</td></tr><tr><td>DELETE</td><td>root(远程)</td><td>%</td><td>禁止远程登录</td><td>待处理</td></tr><tr><td>REVOKE</td><td>dev_user</td><td>%</td><td>DELETE,DROP,ALTER</td><td>待处理</td></tr><tr><td>REVOKE</td><td>app_user</td><td>192.168.%</td><td>DELETE</td><td>待处理</td></tr><tr><td>DROP</td><td>匿名用户</td><td>localhost</td><td>删除匿名用户</td><td>待处理</td></tr></table></div>
+<h2>4. 数据恢复情况</h2>
+<div class="section info">
+
+    <p><strong>恢复类型:</strong> 时间点恢复 (PITR)</p>
+    <p><strong>恢复状态:</strong> 未执行</p>
+    <p>学员当前处于「failed」分支，未选择数据恢复路线或未执行恢复操作。</p>
+    <p>如需数据恢复，请依次执行:</p>
+    <ol>
+        <li>xtrabackup --prepare --apply-log-only --target-dir=/backup/full/</li>
+        <li>xtrabackup --copy-back --target-dir=/backup/full/ --datadir=/var/lib/mysql/</li>
+        <li>mysqlbinlog --stop-datetime='恢复时间点' /backup/binlog/mysql-bin.000012 | mysql -u root -p</li>
+        <li>CHECKSUM TABLE core_bank.trade_flow 校验数据完整性</li>
+    </ol></div>
+<h2>5. 修复加固建议</h2>
+<div class="section">
+    <div class="recommendation"><strong>1. 立即执行:</strong><br>
+    • 所有生产环境使用参数化查询，杜绝字符串拼接SQL<br>
+    • 撤销所有非管理员的全局DELETE/DROP/FILE权限<br>
+    • 禁止root远程登录，仅允许localhost访问<br>
+    • 删除匿名用户，启用密码强度验证插件</div>
+    <div class="recommendation"><strong>2. 短期整改（1-2周）:</strong><br>
+    • 部署WAF (ModSecurity + OWASP CRS规则集)<br>
+    • 启用审计日志和慢查询日志<br>
+    • 修改默认MySQL端口(3306)<br>
+    • 启用SSL/TLS加密传输</div>
+    <div class="recommendation"><strong>3. 长期规划:</strong><br>
+    • 部署数据库审计系统<br>
+    • 建立定期安全基线检查机制 (每月)<br>
+    • 实施数据库权限季度审查制度</div>
+</div>
+<h2>6. 综合评分与等级</h2>
+<div class="section">
+    <table>
+        <tr><td>基础分</td><td>0/100</td></tr>
+        <tr><td>失败扣分</td><td>-30</td></tr>
+        <tr><td>重试扣分</td><td>-0</td></tr>
+        <tr><td>漏洞修复加分</td><td>+0</td></tr>
+        <tr><td><strong>最终得分</strong></td><td><strong>0/100</strong></td></tr>
+        <tr><td><strong>等级评定</strong></td><td><strong>F (不合格，需重新培训)</strong></td></tr>
+    </table>
+</div>
+<h2>7. 各分支错误次数</h2>
+<div class="section">
+    <table>
+        <tr><th>分支</th><th>名称</th><th>错误次数</th><th>错误预算</th></tr>
+        <tr><td>baseline</td><td>安全基线检查与权限管控</td><td class="vuln-critical">3 次</td><td>3 次</td></tr>
+        <tr><td>recovery</td><td>数据库备份恢复</td><td class="">0 次</td><td>2 次</td></tr>
+        <tr><td>sqli</td><td>SQL注入攻防</td><td class="">0 次</td><td>2 次</td></tr>
+    </table>
+</div>
+<div style="text-align:center; margin-top:40px; color:#999; font-size:12px;">
+    本报告由 数据库安全运维智能体(Agent 1) 自动生成<br>
+    符合银行业安全运维标准
+</div>
+</body></html>

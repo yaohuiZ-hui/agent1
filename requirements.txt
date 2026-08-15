@@ -1,0 +1,9 @@
+Flask>=2.0.0
+Flask-CORS>=4.0.0
+redis>=4.0.0
+Jinja2>=3.0.0
+WeasyPrint>=54.0
+gunicorn>=20.0.0
+python-docx>=1.1.0
+langgraph>=1.0.0
+langchain-anthropic>=1.5.0
